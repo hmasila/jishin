@@ -32,7 +32,7 @@ options.add_argument("--log-level=3")
 driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=options)
 
 
-def download(problem_num, url, title, solution_slug, title_slug, commit_date):
+def download(problem_num, url, title, solution_slug, title_slug, start_date, end_date):
     print(Fore.BLACK + Back.CYAN + f"Fetching problem num " + Back.YELLOW + f" {problem_num} " + Back.CYAN + " with url " + Back.YELLOW + f" {url} ")
 
     try:
@@ -63,6 +63,7 @@ def download(problem_num, url, title, solution_slug, title_slug, commit_date):
         with open(file_path, "wb") as f:
             f.write(markdown.encode(encoding="utf-8"))
 
+        commit_date = str_time_prop(start_date, end_date)
         # commit changes
         run(['git', 'add', file_path])
         run(['git', 'commit', '-m', title,
@@ -171,7 +172,7 @@ def main(def_args=sys.argv[1:]):
         start_date = time.mktime(time.strptime(args.start_date, "%Y-%m-%d"))
         end_date = time.mktime(time.strptime(args.end_date, "%Y-%m-%d"))
 
-        commit_date = str_time_prop(start_date, end_date)
+        # commit_date = str_time_prop(start_date, end_date)
     except ValueError:
         sys.exit('Date format is not correct. Please use YYY-MM-DD format.')
 
@@ -211,7 +212,7 @@ def main(def_args=sys.argv[1:]):
              title = f"{frontend_question_id}. {question__title}"
 
              # Download each file as html and write chapter to chapters.pickle
-             download(i, url , title, question__article__slug, question__title_slug, commit_date)
+             download(i, url , title, question__article__slug, question__title_slug, start_date, end_date)
 
              # Sleep for 20 secs for each problem and 2 minns after every 30 problems
              if i % 30 == 0:
@@ -241,12 +242,12 @@ def arguments(argsval):
     parser.add_argument('-ue', '--user_email', type=str, required=False,
                         help="""Overrides user.email git config.
                         If not specified, the global config is used.""")
-    parser.add_argument('-st', '--start_date', type=str, default='2019-02-14',
+    parser.add_argument('-st', '--start_date', type=str, default='2019-01-01',
                         required=False, help="""Specifies the date to start adding
                         commits. The format should be YYYY-MM-DD.
                         For example: if it's set to 2019-02-14,
                         there will be no commits generated before that date""")
-    parser.add_argument('-ed', '--end_date', type=str, default='2023-02-14',
+    parser.add_argument('-ed', '--end_date', type=str, default='2023-01-01',
                         required=False, help="""Specifies the date to stop adding
                         commits. The format should be YYYY-MM-DD.
                         For example: if it's set to 2023-02-14,
